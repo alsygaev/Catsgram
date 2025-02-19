@@ -36,13 +36,13 @@ public class PostController {
     public Post update(@RequestBody Post newPost) {
         //Проверяем необходимые условия
         if (newPost.getId() == null) {
-            throw new ConditionsNotMetException("ID не может быть пустым!");
+            throw new ConditionsNotMetException("Id не может быть пустым!");
         }
 
         if (posts.containsKey(newPost.getId())) {
             Post oldPost = posts.get(newPost.getId());
             if (oldPost.getDescription() == null || oldPost.getDescription().isBlank()) {
-                throw new ConditionsNotMetException("Описание не может быть пустым!");
+                throw new ConditionsNotMetException("Описание не может быть пустым");
             }
 
             //Если пост найден и все условия соблюдены, тогда обновляем содержимое поста
