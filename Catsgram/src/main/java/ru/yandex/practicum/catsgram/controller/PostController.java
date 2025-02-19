@@ -42,7 +42,7 @@ public class PostController {
         if (posts.containsKey(newPost.getId())) {
             Post oldPost = posts.get(newPost.getId());
             if (oldPost.getDescription() == null || oldPost.getDescription().isBlank()) {
-                throw new ConditionsNotMetException("Описание не может быть пустым");
+                throw new ConditionsNotMetException("Описание не может быть пустым!");
             }
 
             //Если пост найден и все условия соблюдены, тогда обновляем содержимое поста
