@@ -36,7 +36,7 @@ public class PostController {
     public Post update(@RequestBody Post newPost) {
         //Проверяем необходимые условия
         if (newPost.getId() == null) {
-            throw new ConditionsNotMetException("Id не может быть пустым!");
+            throw new ConditionsNotMetException("ID не может быть пустым!");
         }
 
         if (posts.containsKey(newPost.getId())) {
