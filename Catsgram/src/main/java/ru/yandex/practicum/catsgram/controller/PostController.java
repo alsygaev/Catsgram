@@ -1,66 +1,46 @@
 package ru.yandex.practicum.catsgram.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.catsgram.exception.ConditionsNotMetException;
-import ru.yandex.practicum.catsgram.exception.NotFoundException;
 import ru.yandex.practicum.catsgram.model.Post;
-
-import java.time.Instant;
+import ru.yandex.practicum.catsgram.model.SortOrder;
+import ru.yandex.practicum.catsgram.service.PostService;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/posts")
 public class PostController {
-    private final Map<Long, Post> posts = new HashMap<>();
+    private final PostService postService;
+
+    public PostController(PostService postService) {
+        this.postService = postService;
+    }
 
     @GetMapping
-    public Collection<Post> findAll() {
-        return posts.values();
+    public Collection<Post> findAll(
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "0") int from,
+            @RequestParam(defaultValue = "desc") String sort
+    ) {
+        SortOrder sortOrder = SortOrder.from(sort);
+        return postService.findAll(from, size, sortOrder);
+    }
+
+    @GetMapping("/{postId}")
+    public <Optional> java.util.Optional<Post> findById(@PathVariable long postId) {
+        return postService.findById(postId);
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public Post create(@RequestBody Post post) {
-        if (post.getDescription() == null || post.getDescription().isBlank()) {
-            throw new IllegalArgumentException("Описание не может быть пустым");
-        }
-        post.setId(getNextId());
-        post.setPostDate(Instant.now());
-        posts.put(post.getId(), post);
-
-        return post;
+        return postService.create(post);
     }
 
     @PutMapping
     public Post update(@RequestBody Post newPost) {
-        //Проверяем необходимые условия
-        if (newPost.getId() == null) {
-            throw new ConditionsNotMetException("Id не может быть пустым!");
-        }
-
-        if (posts.containsKey(newPost.getId())) {
-            Post oldPost = posts.get(newPost.getId());
-            if (oldPost.getDescription() == null || oldPost.getDescription().isBlank()) {
-                throw new ConditionsNotMetException("Описание не может быть пустым");
-            }
-
-            //Если пост найден и все условия соблюдены, тогда обновляем содержимое поста
-            oldPost.setDescription(newPost.getDescription());
-
-            return oldPost;
-        }
-        throw new NotFoundException("Пост id "+ newPost.getId() + " не найден");
+       return postService.update(newPost);
     }
 
-    //Метод для генерации ID
-    private long getNextId() {
-        long currentMaxId = posts.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
-
-        return ++currentMaxId;
-    }
 }
+
